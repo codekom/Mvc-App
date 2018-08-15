@@ -3,3 +3,6 @@
 ################################################################################
 
 /VidlyApp/packages
+/VidlyApp/VidlyApp/bin
+/VidlyApp/VidlyApp/obj/Debug
+/VidlyApp/.vs
