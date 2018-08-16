@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Data.Entity;
 using System.Web;
 using System.Web.Mvc;
 using VidlyApp.Models;
@@ -10,47 +11,31 @@ namespace VidlyApp.Controllers
 {
     public class MoviesController : Controller
     {
-        public ActionResult Random()
+        private ApplicationDbContext _context;
+        public MoviesController()
         {
-            var movie = new Movie() { Name = "Shrek!" };
-
-            var customers = new List<Customer>
-            {
-                new Customer {Name = "Customer 1" },
-                new Customer {Name = "Customer 2" }
-            };
-
-            var viewModel = new RandomMovieViewModel
-            {
-                Movie = movie,
-                Customers = customers
-            };
-
-            return View(viewModel);
-
-            //return Content("Hello");
-            //return HttpNotFound();
-            //return new EmptyResult();
-            //return RedirectToAction("Index", "Home",new { page = 1, sortBy = "name" });
-        }
-        public ActionResult Edit(int Id)
-        {
-            return Content("Id=" + Id);
+            _context = new ApplicationDbContext();
         }
 
-        private IEnumerable<Movie> GetMovies()
+        protected override void Dispose(bool disposing)
         {
-            return new List<Movie>()
-            {
-                 new Movie {Id=1, Name="Shrek!" },
-                 new Movie {Id=2,Name="Wall-e" }
-            };
+            _context.Dispose();
         }
+
         public ActionResult Index()
         {
-            List<Movie> mv = GetMovies().ToList();
+            List<Movie> mv = _context.Movies.Include(m => m.Genre).ToList();
             
             return View(mv);
+        }
+
+        public ActionResult Details(int Id)
+        {
+            List<Movie> movieList = _context.Movies.Include(m => m.Genre).ToList();
+            var movie = movieList.SingleOrDefault(mt => mt.Id == Id);
+            if (movie == null)
+                return HttpNotFound();
+            return View(movie);
         }
 
         [Route("movies/released/{year}/{month:regex(\\d{2}):range(1,12)}")]
